@@ -1,4 +1,5 @@
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   // this is preset ignore zipping assets, dont worry about this...
   mode: "development",
@@ -11,13 +12,12 @@ module.exports = {
   // output, where its smushing all together...
   output: {
     path: path.resolve(__dirname, "./build"),
-    libraryTarget: "commonjs2",
   },
   // this is where the 'loaders' i mentioned are used
   module: {
     rules: [
       {
-        test: /\.(ts|jsx|js)$/,
+        test: /\.(ts|tsx|jsx|js)$/,
         exclude: /node_modules/,
         // we use just one loader atm...
         use: "babel-loader",
@@ -27,9 +27,17 @@ module.exports = {
   // like node, this is the resolving engine for webpack, when we require or import it intervenes as part of the grouping of files...
   //  atm we are only requiring extensions of js and ts types, but you will need to add more for css
   resolve: {
-    extensions: [".js", ".ts", ".tsx"],
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
     // so when we require, look in node_modules, but also in our current directory...
     modules: ["node_modules", path.resolve(__dirname, "src")],
     alias: {},
+  },
+  plugins: [new HtmlWebpackPlugin({})],
+
+  devServer: {
+    hot: true,
+    host: "0.0.0.0",
+    static: path.resolve(__dirname, "build"),
+    historyApiFallback: true,
   },
 };

@@ -1,4 +1,4 @@
-# Project Init (usual stuff)
+# 1. Project Init (usual stuff)
 
 ```
 git init
@@ -10,7 +10,7 @@ node_modules
 
 ```
 
-# Install baseline packages
+# 2. Install essential npm packages
 
 ## lets start with webpack
 
@@ -29,13 +29,13 @@ So as mentioned webpack just concatenates, but it has the concept of loaders (3r
 ### Lets install webpack loaders
 
 ```
-npm i babel-loader css-loader url-loader style-loader raw-loader --save-dev
+npm i babel-loader css-loader url-loader style-loader raw-loader  --save-dev
 ```
 
-### Lets install webpack dev server (this is the localhost plugin)
+### Lets install webpack dev server (this is the localhost server)
 
 ```
-npm i webpack-dev-server
+npm i webpack-dev-server html-webpack-plugin --save-dev
 ```
 
 ## Babel, nutshell.... sorry if you know this stuff but might helpful....
@@ -45,7 +45,7 @@ webpack just moves code into an output, singular file, Babel transpiles latest j
 ### Lets install babel,
 
 ```
-npm i @babel/core @babel/preset-env @babel/preset-typescript --save-dev
+npm i @babel/core @babel/preset-env @babel/preset-typescript @babel/preset-react --save-dev
 ```
 
 ## Typescript
@@ -66,7 +66,7 @@ npm i react react-dom --save
 
 ## Installing done!
 
-# Build a project
+# 3. Build some code using webpack
 
 ## Babel configuration file
 
@@ -78,6 +78,7 @@ module.exports = {
   presets: [
     "@babel/preset-env" ,
     "@babel/preset-typescript",
+    "@babel/preset-react"
   ],
 };
 ```
@@ -101,13 +102,12 @@ module.exports = {
   // output, where its smushing all together...
   output: {
     path: path.resolve(__dirname, "./build"),
-    libraryTarget: "commonjs2",
   },
   // this is where the 'loaders' i mentioned are used
   module: {
     rules: [
       {
-        test: /\.(ts|jsx|js)$/,
+        test: /\.(ts|tsx|jsx|js)$/,
         exclude: /node_modules/,
         // we use just one loader atm...
         use: "babel-loader",
@@ -117,7 +117,7 @@ module.exports = {
   // like node, this is the resolving engine for webpack, when we require or import it intervenes as part of the grouping of files...
   //  atm we are only requiring extensions of js and ts types, but you will need to add more for css
   resolve: {
-    extensions: [".js", ".ts", ".tsx"],
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
     // so when we require, look in node_modules, but also in our current directory...
     modules: ["node_modules", path.resolve(__dirname, "src")],
     alias: {},
@@ -146,4 +146,49 @@ npm run build
 
 you should see a build file, this is webpack, its got the entry file, and spat out the gathered 'assets', in this case one file into a single entity.
 
-## Lets setup a server
+# Setup a server
+
+so webpack doesnt roll with a host, its was the package we still earlier that needs to be added to config
+
+```
+//add this to the webpack config as a property...
+
+  devServer: {
+    hot: true,
+    host: "0.0.0.0",
+    static: path.resolve(__dirname, "build"),
+    historyApiFallback: true,
+  },
+
+```
+
+add to package json a new script
+
+```
+...in scripts package.json, add
+"start": "webpack-dev-server"
+```
+
+now if you run and open localhost:8080, youll get a server! But its a 404, this is because this dev server does nothing to inject code
+
+## The final config addition (probably not!)
+
+so we need a plugin that can create an html page for us with the code built out in memory
+
+```
+
+//add this at the top of the file
+
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+//add this to the webpack config as a property...
+
+plugins: [
+  new HtmlWebpackPlugin({}),
+],
+
+```
+
+```
+npm run start
+```
